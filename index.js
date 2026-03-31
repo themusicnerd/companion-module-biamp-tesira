@@ -109,8 +109,9 @@ class TesiraInstance extends InstanceBase {
 				const lines = receivebuffer.split('\n')
 				receivebuffer = lines.pop()
 
-				for (const line of lines) {
-				if (!line.trim()) continue
+				for (const rawLine of lines) {
+				const line = rawLine.replace(/\r$/, '')
+				if (!line) continue
 
 				this.debugLog('Data: ' + line)
 
@@ -250,8 +251,9 @@ class TesiraInstance extends InstanceBase {
 				const lines = receivebuffer.split('\n')
 				receivebuffer = lines.pop()
 
-				for (const line of lines) {
-				if (!line.trim()) continue
+				for (const rawLine of lines) {
+				const line = rawLine.replace(/\r$/, '')
+				if (!line) continue
 
 				this.debugLog('Polling data: ' + line)
 
@@ -283,14 +285,18 @@ class TesiraInstance extends InstanceBase {
 								this.setVariableDefinitions(this.customVars)
 							}
 
-							//Check if this is a value that should be rounded to whole number
-							if (currentPoll.roundVal && !isNaN(tokenValue)) {
-								const numberValue = parseFloat(tokenValue)
-								tokenValue = Math.round(numberValue).toString()
+							//Parse numeric values (parseFloat ignores trailing junk from TCP interleaving)
+							const parsedTokenVal = parseFloat(tokenValue)
+							if (!isNaN(parsedTokenVal)) {
+								if (currentPoll.roundVal) {
+									tokenValue = Math.round(parsedTokenVal).toString()
+								} else {
+									tokenValue = parsedTokenVal.toString()
+								}
+							} else {
+								//Remove trailing zeroes from non-numeric values
+								tokenValue = tokenValue.replace(/(\.\d*?[1-9])0+|\.0*$/, '$1')
 							}
-
-							//Remove trailing zeroes
-							tokenValue = tokenValue.replace(/(\.\d*?[1-9])0+|\.0*$/, '$1')
 							tmpVar[tmpVarName] = tokenValue
 							this.debugLog('Variable set - ' + tmpVarName + ' = ' + tokenValue)
 						}
@@ -305,14 +311,18 @@ class TesiraInstance extends InstanceBase {
 							this.setVariableDefinitions(this.customVars)
 						}
 
-						//Check if this is a value that should be rounded to whole number
-						if (currentPoll.roundVal && !isNaN(value)) {
-							const numberValue = parseFloat(value)
-							value = Math.round(numberValue).toString()
+						//Parse numeric values (parseFloat ignores trailing junk from TCP interleaving)
+						const parsedVal = parseFloat(value)
+						if (!isNaN(parsedVal)) {
+							if (currentPoll.roundVal) {
+								value = Math.round(parsedVal).toString()
+							} else {
+								value = parsedVal.toString()
+							}
+						} else {
+							//Remove trailing zeroes from non-numeric values
+							value = value.replace(/(\.\d*?[1-9])0+|\.0*$/, '$1')
 						}
-
-						//Remove trailing zeroes
-						value = value.replace(/(\.\d*?[1-9])0+|\.0*$/, '$1')
 						tmpVar[currentPoll.name] = value
 						this.debugLog('Variable set - ' + currentPoll.name + ' = ' + value)
 					}

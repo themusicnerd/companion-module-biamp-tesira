@@ -582,12 +582,12 @@ class TesiraInstance extends InstanceBase {
 		this.setPresetDefinitions(presets)
 	}
 
-	Fader_Change(command, deviceID, instanceID, channel, amount) {
-		cmd = instanceID + ' ' + command + ' ' + 'level' + ' ' + channel + ' ' + amount
+	Fader_Change(command, instanceID, channel, amount) {
+		const cmd = instanceID + ' ' + command + ' ' + 'level' + ' ' + channel + ' ' + amount
 		this.sendCommand(cmd)
 	}
 
-	Fader_Timer(mode, rate, command, deviceID, instanceID, channel, amount) {
+	Fader_Timer(mode, rate, command, instanceID, channel, amount) {
 		if (this.TIMER_FADER !== null) {
 			clearInterval(this.TIMER_FADER)
 			this.TIMER_FADER = null
@@ -598,7 +598,6 @@ class TesiraInstance extends InstanceBase {
 				this.Fader_Change.bind(this),
 				parseInt(rate),
 				command,
-				deviceID,
 				instanceID,
 				channel,
 				amount,

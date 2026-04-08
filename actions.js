@@ -146,7 +146,6 @@ module.exports = function (self) {
 					'start',
 					event.options.rate,
 					event.options.command,
-					event.options.deviceID,
 					event.options.instanceID,
 					event.options.channel,
 					event.options.amount,

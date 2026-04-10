@@ -168,8 +168,18 @@ class TesiraInstance extends InstanceBase {
 						}
 					} else {
 						//Not an array, process single return value
-						//Remove quotes and replace escaped quotes
-						value = value.replace(/(?<!\\)"/g, '').replace(/\\"/g, '"')
+						// Clean scalar value - extract precise value to ignore trailing echo junk
+						// that can appear when the Tesira interleaves command echo with response data
+						var quotedMatch = value.match(/^"((?:[^"\\]|\\.)*)"/)
+						var boolMatch = value.match(/^(true|false)/)
+						if (quotedMatch) {
+							value = quotedMatch[1].replace(/\\"/g, '"')
+						} else if (boolMatch) {
+							value = boolMatch[1]
+						} else {
+							//Remove quotes and replace escaped quotes
+							value = value.replace(/(?<!\\)"/g, '').replace(/\\"/g, '"')
+						}
 
 						//Add custom variable if needed
 						if (!(varName in this.customVarNames)) {
@@ -301,8 +311,18 @@ class TesiraInstance extends InstanceBase {
 							this.debugLog('Variable set - ' + tmpVarName + ' = ' + tokenValue)
 						}
 					} else {
-						//Remove quotes and replace escaped quotes
-						value = value.replace(/(?<!\\)"/g, '').replace(/\\"/g, '"')
+						// Clean scalar value - extract precise value to ignore trailing echo junk
+						// that can appear when the Tesira interleaves command echo with response data
+						var quotedMatch = value.match(/^"((?:[^"\\]|\\.)*)"/)
+						var boolMatch = value.match(/^(true|false)/)
+						if (quotedMatch) {
+							value = quotedMatch[1].replace(/\\"/g, '"')
+						} else if (boolMatch) {
+							value = boolMatch[1]
+						} else {
+							//Remove quotes and replace escaped quotes
+							value = value.replace(/(?<!\\)"/g, '').replace(/\\"/g, '"')
+						}
 
 						//Add custom variable if needed
 						if (!(currentPoll.name in this.customVarNames)) {

@@ -26,6 +26,8 @@ Tesira Software calls these `Instance ID's`, however the Tesira Text Protocol ca
 
 - mute, level, cough, talk, and latch-talk button workflows
 - discovered router/source-selector mute, level, and route-status presets
+- matrix mixer crosspoint on/off/toggle/query controls
+- matrix mixer crosspoint level set/adjust/query controls
 - rotary level button presets with mute on press
 - VU, gain reduction, and horizontal level meter feedbacks
 - a flexible meter builder for more advanced meter layouts
@@ -108,6 +110,9 @@ In the Companion module config:
   - enter the Tesira IP address or hostname
 - `Port`
   - normally leave this at `23`
+- `Login username` / `Login password`
+  - sent automatically if the Tesira Text Protocol server prompts for credentials
+  - unprotected Tesira systems use `default` / `default`
 - `Fetch instance tags after connect`
   - runs `SESSION get aliases` automatically after the Tesira welcome banner is received
   - on larger systems this can take about 30 seconds
@@ -243,6 +248,24 @@ Routers are handled differently:
 - aliases that look like routers will fan out by discovered output count
 - the module discovers outputs by polling `sourceSelection`, `outputLevel`, and `outputMute`
 - each discovered output gets its own router status, mute, and trim presets
+
+#### Matrix mixer crosspoints
+
+Use `Matrix crosspoint on / off / toggle / query` to control standard matrix mixer routes.
+
+The generated Tesira Text Protocol command shape is:
+
+- `Mixer1 set crosspoint 1 1 true`
+- `Mixer1 toggle crosspoint 1 1`
+- `Mixer1 get crosspoint 1 1`
+
+Use `Matrix crosspoint level set / adjust / query` when the matrix block exposes crosspoint level control.
+
+The generated command shape is:
+
+- `Mixer1 set crosspointLevel 1 1 -6`
+- `Mixer1 increment crosspointLevel 1 1 1`
+- `Mixer1 get crosspointLevel 1 1`
 
 ## Presets And Control Families
 

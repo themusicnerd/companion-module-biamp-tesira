@@ -1,27 +1,50 @@
 {
-	"name": "biamp-tesira",
-	"version": "2.1.1-beta.3",
-	"main": "index.js",
+	"name": "companion-module-biamp-tesira",
+	"version": "3.0.1",
+	"main": "dist/main.js",
+	"type": "module",
 	"scripts": {
+		"postinstall": "husky",
 		"format": "prettier -w .",
-		"package": "companion-module-build"
+		"package": "run build && companion-module-build",
+		"build": "rimraf dist && run build:main",
+		"build:main": "tsc -p tsconfig.build.json",
+		"dev": "tsc -p tsconfig.build.json --watch",
+		"lint:raw": "eslint",
+		"lint": "run lint:raw ."
 	},
+	"license": "MIT",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/bitfocus/companion-module-biamp-tesira.git"
 	},
-	"license": "MIT",
 	"engines": {
 		"node": "^22.20",
 		"yarn": "^4"
 	},
 	"dependencies": {
-		"@companion-module/base": "~1.11.3"
+		"@companion-module/base": "~1.14.1",
+		"companion-module-utils": "^0.5.0"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "^2.7.1",
-		"prettier": "^3.8.1"
+		"@companion-module/tools": "^2.6.1",
+		"@types/node": "^22.19.3",
+		"eslint": "^9.39.2",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.2.7",
+		"prettier": "^3.7.4",
+		"rimraf": "^6.1.2",
+		"typescript": "~5.9.3",
+		"typescript-eslint": "^8.51.0"
 	},
 	"prettier": "@companion-module/tools/.prettierrc.json",
+	"lint-staged": {
+		"*.{css,json,md,scss}": [
+			"prettier --write"
+		],
+		"*.{ts,tsx,js,jsx}": [
+			"yarn lint:raw --fix"
+		]
+	},
 	"packageManager": "yarn@4.12.0"
 }

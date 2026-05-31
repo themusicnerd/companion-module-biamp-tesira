@@ -1,8 +1,9 @@
 {
+	"$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
 	"id": "biamp-tesira",
 	"name": "biamp-tesira",
-	"shortname": "biamp-tesira",
-	"description": "Control Biamp TesiraFORTE devices",
+	"shortname": "tesira",
+	"description": "Control and meter Biamp Tesira systems over the Tesira Text Protocol",
 	"version": "0.0.0",
 	"license": "MIT",
 	"repository": "git+https://github.com/bitfocus/companion-module-biamp-tesira.git",
@@ -33,10 +34,10 @@
 		"type": "node22",
 		"api": "nodejs-ipc",
 		"apiVersion": "0.0.0",
-		"entrypoint": "../index.js"
+		"entrypoint": "../dist/main.js"
 	},
 	"legacyIds": [],
 	"manufacturer": "Biamp",
-	"products": ["TesiraFORTE"],
-	"keywords": ["audio", "tesira", "dsp"]
+	"products": ["Tesira", "Tesira Server", "Tesira Forte", "Tesira Forte X", "Tesira Volta"],
+	"keywords": ["audio", "tesira", "dsp", "metering", "subscriptions"]
 }

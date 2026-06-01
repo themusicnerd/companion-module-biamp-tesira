@@ -3,6 +3,7 @@ import type { SomeCompanionConfigField } from '@companion-module/base'
 export interface ModuleConfig {
 	host: string
 	port: number
+	loginUsername: string
 	pollingInterval: number
 	defaultSubscriptionRate: number
 	autoFetchAliases: boolean
@@ -12,6 +13,10 @@ export interface ModuleConfig {
 	pairOverrides: string
 	levelRangeOverrides: string
 	sourceSelectorNames: string
+}
+
+export interface ModuleSecrets {
+	loginPassword?: string
 }
 
 export function GetConfigFields(): SomeCompanionConfigField[] {
@@ -33,6 +38,23 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			max: 65535,
 			default: 23,
 			tooltip: 'Tesira Text Protocol telnet port.',
+		},
+		{
+			type: 'textinput',
+			id: 'loginUsername',
+			label: 'Login username',
+			width: 6,
+			default: 'default',
+			tooltip:
+				'Username sent if the Tesira Text Protocol server prompts for login. Unprotected systems use default/default.',
+		},
+		{
+			type: 'secret-text',
+			id: 'loginPassword',
+			label: 'Login password',
+			width: 6,
+			default: 'default',
+			tooltip: 'Password sent if the Tesira Text Protocol server prompts for login. Stored as a Companion secret.',
 		},
 		{
 			type: 'number',

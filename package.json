@@ -1,17 +1,17 @@
 {
 	"name": "companion-module-biamp-tesira",
-	"version": "3.0.1",
+	"version": "3.0.2",
 	"main": "dist/main.js",
 	"type": "module",
 	"scripts": {
 		"postinstall": "husky",
 		"format": "prettier -w .",
-		"package": "run build && companion-module-build",
-		"build": "rimraf dist && run build:main",
+		"package": "rimraf dist && tsc -p tsconfig.build.json && companion-module-build",
+		"build": "rimraf dist && tsc -p tsconfig.build.json",
 		"build:main": "tsc -p tsconfig.build.json",
 		"dev": "tsc -p tsconfig.build.json --watch",
 		"lint:raw": "eslint",
-		"lint": "run lint:raw ."
+		"lint": "eslint ."
 	},
 	"license": "MIT",
 	"repository": {

@@ -246,6 +246,123 @@ export function UpdateActions(self: ModuleInstance): void {
 				self.sendCommand(buildCommandParts(instanceTag, 'set', 'sourceSelection', output, source))
 			},
 		},
+		matrix_crosspoint: {
+			name: 'Matrix crosspoint on / off / toggle / query',
+			options: [
+				{
+					id: 'instanceTag',
+					type: 'textinput',
+					label: 'Matrix mixer instance tag',
+					default: 'Mixer1',
+					useVariables: true,
+				},
+				{
+					id: 'input',
+					type: 'textinput',
+					label: 'Input',
+					default: '1',
+					useVariables: true,
+				},
+				{
+					id: 'output',
+					type: 'textinput',
+					label: 'Output',
+					default: '1',
+					useVariables: true,
+				},
+				{
+					id: 'state',
+					type: 'dropdown',
+					label: 'State',
+					default: 'true',
+					choices: [
+						{ id: 'true', label: 'On' },
+						{ id: 'false', label: 'Off' },
+						{ id: 'toggle', label: 'Toggle' },
+						{ id: 'get', label: 'Query current state' },
+					],
+				},
+			],
+			callback: async (action) => {
+				const instanceTag = (await self.parseVariablesInString(String(action.options.instanceTag ?? ''))).trim()
+				const input = (await self.parseVariablesInString(String(action.options.input ?? ''))).trim()
+				const output = (await self.parseVariablesInString(String(action.options.output ?? ''))).trim()
+				const state = String(action.options.state ?? 'true')
+				if (!instanceTag || !input || !output) throw new Error('Instance tag, input, and output are required')
+
+				if (state === 'toggle' || state === 'get') {
+					self.sendCommand(buildCommandParts(instanceTag, state, 'crosspoint', input, output))
+				} else {
+					self.sendCommand(buildCommandParts(instanceTag, 'set', 'crosspoint', input, output, state))
+				}
+			},
+		},
+		matrix_crosspoint_level: {
+			name: 'Matrix crosspoint level set / adjust / query',
+			options: [
+				{
+					id: 'instanceTag',
+					type: 'textinput',
+					label: 'Matrix mixer instance tag',
+					default: 'Mixer1',
+					useVariables: true,
+				},
+				{
+					id: 'input',
+					type: 'textinput',
+					label: 'Input',
+					default: '1',
+					useVariables: true,
+				},
+				{
+					id: 'output',
+					type: 'textinput',
+					label: 'Output',
+					default: '1',
+					useVariables: true,
+				},
+				{
+					id: 'command',
+					type: 'dropdown',
+					label: 'Command',
+					default: 'set',
+					choices: [
+						{ id: 'set', label: 'Set' },
+						{ id: 'increment', label: 'Increment' },
+						{ id: 'decrement', label: 'Decrement' },
+						{ id: 'get', label: 'Query current level' },
+					],
+				},
+				{
+					id: 'level',
+					type: 'textinput',
+					label: 'Level / amount (dB)',
+					default: '0',
+					useVariables: true,
+					isVisible: (options) => options.command !== 'get',
+				},
+			],
+			callback: async (action) => {
+				const instanceTag = (await self.parseVariablesInString(String(action.options.instanceTag ?? ''))).trim()
+				const input = (await self.parseVariablesInString(String(action.options.input ?? ''))).trim()
+				const output = (await self.parseVariablesInString(String(action.options.output ?? ''))).trim()
+				const command = String(action.options.command ?? 'set')
+				const level = (await self.parseVariablesInString(String(action.options.level ?? ''))).trim()
+				if (!instanceTag || !input || !output) throw new Error('Instance tag, input, and output are required')
+				if (command !== 'get' && !level) throw new Error('Level / amount is required')
+
+				self.sendCommand(
+					buildCommandParts(
+						instanceTag,
+						command,
+						'crosspointLevel',
+						input,
+						output,
+						command === 'get' ? undefined : level,
+					),
+				)
+			},
+		},
 		ttp_command: {
 			name: 'Custom Tesira command builder',
 			options: [

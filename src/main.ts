@@ -6,7 +6,7 @@ import {
 	type CompanionVariableDefinition,
 	type SomeCompanionConfigField,
 } from '@companion-module/base'
-import { GetConfigFields, type ModuleConfig } from './config.js'
+import { GetConfigFields, type ModuleConfig, type ModuleSecrets } from './config.js'
 import { UpdateVariableDefinitions } from './variables.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
@@ -124,8 +124,9 @@ function extractInstanceTagFromCommand(command: string): string | undefined {
 	return instanceTag || undefined
 }
 
-export class ModuleInstance extends InstanceBase<ModuleConfig> {
+export class ModuleInstance extends InstanceBase<ModuleConfig, ModuleSecrets> {
 	config!: ModuleConfig
+	secrets: ModuleSecrets = {}
 	isReady = false
 	lastError = 'Not connected'
 	lastCommand = ''
@@ -158,8 +159,9 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		super(internal)
 	}
 
-	async init(config: ModuleConfig): Promise<void> {
+	async init(config: ModuleConfig, _isFirstInit: boolean, secrets: ModuleSecrets): Promise<void> {
 		this.config = config
+		this.secrets = secrets ?? {}
 		this.syncStartupSubscriptions()
 		this.refreshVariableDefinitions()
 		this.updateVariables()
@@ -173,8 +175,9 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		await this.closeConnections()
 	}
 
-	async configUpdated(config: ModuleConfig): Promise<void> {
+	async configUpdated(config: ModuleConfig, secrets: ModuleSecrets): Promise<void> {
 		this.config = config
+		this.secrets = secrets ?? {}
 		this.syncStartupSubscriptions()
 		this.updateActions()
 		this.updateFeedbacks()
@@ -599,6 +602,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 
 		this.socket.on('data', (buffer: Buffer) => {
 			receiveBuffer += buffer.toString('utf-8')
+			receiveBuffer = this.respondToLoginPrompt(receiveBuffer, this.socket, 'command')
 			const lines = receiveBuffer.split('\n')
 			receiveBuffer = lines.pop() ?? ''
 			for (const rawLine of lines) {
@@ -635,6 +639,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 
 		this.pollSocket.on('data', (buffer: Buffer) => {
 			receiveBuffer += buffer.toString('utf-8')
+			receiveBuffer = this.respondToLoginPrompt(receiveBuffer, this.pollSocket, 'polling')
 			const lines = receiveBuffer.split('\n')
 			receiveBuffer = lines.pop() ?? ''
 			for (const rawLine of lines) {
@@ -647,6 +652,32 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 			if (type === 'DO') void this.pollSocket?.send(Buffer.from([255, 252, info]))
 			if (type === 'WILL') void this.pollSocket?.send(Buffer.from([255, 254, info]))
 		})
+	}
+
+	private respondToLoginPrompt(buffer: string, socket: TelnetHelper | undefined, socketName: string): string {
+		const prompt = buffer.replace(/\r\0/g, '\n').replace(/\r/g, '\n').split('\n').pop()?.trim().toLowerCase()
+
+		if (!prompt || !socket?.isConnected) return buffer
+
+		if (/^(login|username|user name|user):\s*$/.test(prompt)) {
+			const username = this.config.loginUsername?.trim() || 'default'
+			this.lastCommand = 'login username'
+			this.log('debug', `Sent Tesira ${socketName} socket login username`)
+			void socket.send(`${username}\n`)
+			this.updateVariables()
+			return ''
+		}
+
+		if (/^password:\s*$/.test(prompt)) {
+			const password = this.secrets.loginPassword ?? 'default'
+			this.lastCommand = 'login password'
+			this.log('debug', `Sent Tesira ${socketName} socket login password`)
+			void socket.send(`${password}\n`)
+			this.updateVariables()
+			return ''
+		}
+
+		return buffer
 	}
 
 	private handleCommandLine(line: string): void {
